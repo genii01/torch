@@ -39,7 +39,7 @@ class CHDataloader(CHPath):
         return {
             "input_ids": encoded_inputs["input_ids"],
             "attention_mask": encoded_inputs["attention_mask"],
-            "labels": labels,
+            "labels": torch.tensor(labels),
         }
 
     def get_dataloader(self) -> DataLoader:

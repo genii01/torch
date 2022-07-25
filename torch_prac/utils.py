@@ -9,6 +9,14 @@ from torch_prac.model.models import (
     ROBERTA_S_Multi_Classifier,
 )
 
+from torch_prac.config import CHPath
+from torch_prac.config import parser_args
+from torch_prac.logger import get_logger
+
+config = parser_args()
+path = CHPath(config)
+LOGGER = get_logger()
+
 
 def get_tokenizer(config):
     if config.model == "klue_roberta":
@@ -64,7 +72,7 @@ def save_tokenizer(tokenizer, save_path):
     tokenizer.save_pretrained(save_path)
 
 
-def load_dataset(config):
+def load_dataset(config, dataset_file_path):
     if os.path.isfile(path.preprocessed_dataset_file_path):
         LOGGER.info("[+] Preprocessed Dataset already exist")
         dataset = pd.read_feather(path.preprocessed_dataset_file_path)
