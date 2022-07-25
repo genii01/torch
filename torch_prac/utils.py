@@ -1,3 +1,5 @@
+import os
+import pandas as pd
 from transformers import AutoTokenizer
 
 from torch.optim import Adam, AdamW
@@ -60,6 +62,41 @@ def get_optimizer(model, config):
 
 def save_tokenizer(tokenizer, save_path):
     tokenizer.save_pretrained(save_path)
+
+
+def load_dataset(config):
+    if os.path.isfile(path.preprocessed_dataset_file_path):
+        LOGGER.info("[+] Preprocessed Dataset already exist")
+        dataset = pd.read_feather(path.preprocessed_dataset_file_path)
+    else:
+        LOGGER.info("[+] Dataset DownLoading")
+        dataset = pd.read_csv(dataset_file_path)
+        dataset.columns = ["index", "text", "label"]
+
+        LOGGER.info("[+] Dataset Preprocessing")
+        dataset = preprocessing_dataset(config, dataset)
+
+    return dataset
+
+
+def preprocessing_dataset(config, dataset):
+
+    # label 기준 결측치 행 제거, 중복 제거
+    dataset = dataset.loc[dataset["label"].isnull() == False, :]
+    dataset = dataset.drop_duplicates(["text", "label"])
+
+    ## Label Encoding
+    # label_to_num_dict = {
+    #     "entailment": 0,
+    #     "contradiction": 1,
+    #     "neutral": 2,
+    # }
+    # dataset["labels"] = dataset.label.map(label_to_num_dict)
+
+    # 전처리 데이터셋 저장
+    dataset.to_feather(path.preprocessed_dataset_file_path)
+
+    return dataset.reset_index(drop=True)
 
 
 def get_train_valid_loader(
